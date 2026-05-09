@@ -4,11 +4,14 @@ from pathlib import Path
 import tomllib
 
 
-def _load_optional_dependencies():
+def _load_project_metadata():
     pyproject_path = Path(__file__).resolve().parents[1] / "pyproject.toml"
     with pyproject_path.open("rb") as handle:
-        project = tomllib.load(handle)["project"]
-    return project["optional-dependencies"]
+        return tomllib.load(handle)["project"]
+
+
+def _load_optional_dependencies():
+    return _load_project_metadata()["optional-dependencies"]
 
 
 def test_matrix_extra_linux_only_in_all():
@@ -52,3 +55,14 @@ def test_feishu_extra_includes_qrcode_for_qr_login():
 
     feishu_extra = optional_dependencies["feishu"]
     assert any(dep.startswith("qrcode") for dep in feishu_extra)
+
+
+def test_project_urls_publish_user_support_links():
+    project = _load_project_metadata()
+
+    assert project["urls"] == {
+        "Homepage": "https://hermes-agent.nousresearch.com/docs/",
+        "Documentation": "https://hermes-agent.nousresearch.com/docs/",
+        "Repository": "https://github.com/NousResearch/hermes-agent",
+        "Issues": "https://github.com/NousResearch/hermes-agent/issues",
+    }
